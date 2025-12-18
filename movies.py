@@ -1,10 +1,16 @@
 """Movie Database CLI."""
+import os
 import random
 import statistics
 import requests
+from dotenv import load_dotenv
 import movie_storage_sql as movie_storage
 
-API_KEY = "1http://www.omdbapi.com/?i=tt3896198&apikey=e9322028"
+# Load environment variables
+load_dotenv()
+
+# Get the API Key securely
+API_KEY = os.getenv("API_KEY")
 API_URL = "http://www.omdbapi.com/"
 
 
@@ -183,7 +189,6 @@ def movies_sorted_by_rating():
     for title, data in sorted_movies:
         print(f"{title} ({data['year']}): {data['rating']:.1f}")
     print()
-
 
 def main():
     """Main function to run movie app."""
