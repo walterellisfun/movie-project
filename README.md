@@ -71,3 +71,12 @@ python3 main.py
     ├── style.css          # CSS styling for the website
     └── index.html         # The generated website (Output)
 ```
+
+## 🌐 Website Generation
+
+Selecting option **9** in the menu reads the database and generates a static HTML page.
+To view it, open `_static/index.html` in your web browser.
+
+## 🛡️ License
+
+This project is open source and available under the [MIT License](LICENSE).
