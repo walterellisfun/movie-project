@@ -1,8 +1,9 @@
 """Movie Database CLI."""
 import random
 import statistics
-import movie_storage
 import datetime
+# Updated import to use SQL storage
+import movie_storage_sql as movie_storage
 
 
 def print_title():
@@ -68,7 +69,7 @@ def _get_valid_int_input(prompt, min_val, max_val):
 
 def list_movies():
     """Prints all movies with year and rating from storage."""
-    movies_by_title = movie_storage.get_movies()
+    movies_by_title = movie_storage.list_movies()
     total_count = len(movies_by_title)
     print(f"\n{total_count} movie{'s' if total_count != 1 else ''} in total")
     for movie_title, movie_data in movies_by_title.items():
@@ -78,7 +79,7 @@ def list_movies():
 
 def add_movie():
     """Prompts user to add new movie to storage."""
-    movies_by_title = movie_storage.get_movies()
+    movies_by_title = movie_storage.list_movies()
     movie_title = _get_valid_string_input("\nEnter movie name: ")
     if movie_title in movies_by_title:
         print("Error: movie already exists.\n")
@@ -93,7 +94,7 @@ def add_movie():
 
 def delete_movie():
     """Prompts user to delete movie from storage."""
-    movies_by_title = movie_storage.get_movies()
+    movies_by_title = movie_storage.list_movies()
     movie_title = _get_valid_string_input("\nEnter movie name to delete: ")
     if movie_title not in movies_by_title:
         print("Error: movie not found.\n")
@@ -104,7 +105,7 @@ def delete_movie():
 
 def update_movie():
     """Prompts user to update movie rating in storage."""
-    movies_by_title = movie_storage.get_movies()
+    movies_by_title = movie_storage.list_movies()
     movie_title = _get_valid_string_input("\nEnter movie name to update: ")
     if movie_title not in movies_by_title:
         print("Error: movie not found.\n")
@@ -116,7 +117,7 @@ def update_movie():
 
 def stats():
     """Prints movie statistics from storage."""
-    movies_by_title = movie_storage.get_movies()
+    movies_by_title = movie_storage.list_movies()
     print()
     if not movies_by_title:
         print("No movies in database.\n")
@@ -154,7 +155,7 @@ def stats():
 
 def random_movie():
     """Prints one random movie from storage."""
-    movies_by_title = movie_storage.get_movies()
+    movies_by_title = movie_storage.list_movies()
     print()
     if not movies_by_title:
         print("No movies in database.\n")
@@ -167,7 +168,7 @@ def random_movie():
 
 def search_movie():
     """Prompts user for search, prints matches from storage."""
-    movies_by_title = movie_storage.get_movies()
+    movies_by_title = movie_storage.list_movies()
     search_query_lower = _get_valid_string_input("\nEnter part of movie name: ").lower()
     matched_titles = []
     for title, data in movies_by_title.items():
@@ -185,7 +186,7 @@ def search_movie():
 
 def movies_sorted_by_rating():
     """Prints movies from storage sorted by rating, descending."""
-    movies_by_title = movie_storage.get_movies()
+    movies_by_title = movie_storage.list_movies()
     print()
     if not movies_by_title:
         print("No movies in database.\n")
