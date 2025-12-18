@@ -9,7 +9,6 @@ import movie_storage_sql as movie_storage
 # Load environment variables
 load_dotenv()
 
-# Get the API Key securely
 API_KEY = os.getenv("API_KEY")
 API_URL = "http://www.omdbapi.com/"
 
@@ -31,8 +30,9 @@ def print_menu():
     print("6. Random movie")
     print("7. Search movie")
     print("8. Movies sorted by rating")
+    print("9. Generate website")
     print()
-    return input("Enter choice (0-8): ").strip()
+    return input("Enter choice (0-9): ").strip()
 
 
 def _get_valid_string_input(prompt):
@@ -68,8 +68,17 @@ def add_movie():
             return
 
         title = data.get("Title")
-        year = int(data.get("Year"))
-        rating = float(data.get("imdbRating", 0))
+        try:
+            year = int(data.get("Year"))
+        except ValueError:
+            # Handle cases where API returns years like "2000–2004"
+            year = int(data.get("Year", "0").split("–")[0])
+
+        try:
+            rating = float(data.get("imdbRating", 0))
+        except ValueError:
+            rating = 0.0
+
         poster = data.get("Poster", "N/A")
 
         movie_storage.add_movie(title, year, rating, poster)
@@ -179,7 +188,6 @@ def movies_sorted_by_rating():
         print("No movies in database.\n")
         return
 
-    # Sort descending by rating
     sorted_movies = sorted(
         movies_by_title.items(),
         key=lambda item: item[1]['rating'],
@@ -189,6 +197,62 @@ def movies_sorted_by_rating():
     for title, data in sorted_movies:
         print(f"{title} ({data['year']}): {data['rating']:.1f}")
     print()
+
+
+def generate_website():
+    """Generates index.html inside _static/ from template using database data."""
+    static_folder = "_static"
+    template_filename = "index_template.html"
+    output_filename = "index.html"
+
+    template_path = os.path.join(static_folder, template_filename)
+    output_path = os.path.join(static_folder, output_filename)
+
+    # Read Template
+    try:
+        with open(template_path, "r") as file:
+            template_content = file.read()
+    except FileNotFoundError:
+        print(f"Error: Template file not found at '{template_path}'.")
+        print(f"Make sure you have a '{static_folder}' folder containing '{template_filename}'.\n")
+        return
+
+    # Get Movies from DB
+    movies_by_title = movie_storage.list_movies()
+
+    # Build HTML Grid
+    movie_grid_html = ""
+    for title, data in movies_by_title.items():
+        year = data['year']
+        poster = data.get('poster', '')
+
+        # Handle empty/N/A posters
+        if not poster or poster.upper() == "N/A":
+            poster = "https://via.placeholder.com/128x193.png?text=No+Poster"
+
+        movie_html = f"""
+        <li>
+            <div class="movie">
+                <img class="movie-poster" src="{poster}" title="{title}"/>
+                <div class="movie-title">{title}</div>
+                <div class="movie-year">{year}</div>
+            </div>
+        </li>
+        """
+        movie_grid_html += movie_html
+
+    # Replace Placeholders
+    new_content = template_content.replace("__TEMPLATE_TITLE__", "My Movie App")
+    new_content = new_content.replace("__TEMPLATE_MOVIE_GRID__", movie_grid_html)
+
+    try:
+        with open(output_path, "w") as file:
+            file.write(new_content)
+        print(f"Website generated successfully at: {output_path}")
+        print("Open that file in your browser to see the result.\n")
+    except Exception as e:
+        print(f"Error writing website file: {e}\n")
+
 
 def main():
     """Main function to run movie app."""
@@ -216,6 +280,8 @@ def main():
             search_movie()
         elif menu_choice == "8":
             movies_sorted_by_rating()
+        elif menu_choice == "9":
+            generate_website()
         else:
             print("Invalid choice, please try again.\n")
 
